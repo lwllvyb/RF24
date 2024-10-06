@@ -551,7 +551,7 @@ uint8_t RF24::sprintf_address_register(char* out_buffer, uint8_t reg, uint8_t qt
         read_register(reg++, read_buffer, addr_width);
         uint8_t* bufptr = read_buffer + addr_width;
         while (--bufptr >= read_buffer) {
-            offset += sprintf_P(out_buffer + offset, PSTR("%02X"), *bufptr);
+            offset += sprintf_P(out_buffer + offset, PSTR("%02X"), *bufptr); // NOLINT(clang-analyzer-cplusplus.NewDelete)
         }
     }
     delete[] read_buffer;
@@ -661,19 +661,6 @@ static const PROGMEM char* const rf24_pa_dbm_e_str_P[] = {
     rf24_pa_dbm_e_str_3,
 };
 
-    #if defined(RF24_LINUX)
-static const char rf24_csn_e_str_0[] = "CE0 (PI Hardware Driven)";
-static const char rf24_csn_e_str_1[] = "CE1 (PI Hardware Driven)";
-static const char rf24_csn_e_str_2[] = "CE2 (PI Hardware Driven)";
-static const char rf24_csn_e_str_3[] = "Custom GPIO Software Driven";
-static const char* const rf24_csn_e_str_P[] = {
-    rf24_csn_e_str_0,
-    rf24_csn_e_str_1,
-    rf24_csn_e_str_2,
-    rf24_csn_e_str_3,
-};
-    #endif // defined(RF24_LINUX)
-
 static const PROGMEM char rf24_feature_e_str_on[] = "= Enabled";
 static const PROGMEM char rf24_feature_e_str_allowed[] = "= Allowed";
 static const PROGMEM char rf24_feature_e_str_open[] = " open ";
@@ -760,7 +747,7 @@ void RF24::printPrettyDetails(void)
              (char*)(pgm_read_ptr(&rf24_pa_dbm_e_str_P[getPALevel()])));
     printf_P(PSTR("RF Low Noise Amplifier\t" PRIPSTR
                   "\r\n"),
-             (char*)(pgm_read_ptr(&rf24_feature_e_str_P[(read_register(RF_SETUP) & 1) * 1])));
+             (char*)(pgm_read_ptr(&rf24_feature_e_str_P[static_cast<uint8_t>((read_register(RF_SETUP) & 1) * 1)])));
     printf_P(PSTR("CRC Length\t\t" PRIPSTR
                   "\r\n"),
              (char*)(pgm_read_ptr(&rf24_crclength_e_str_P[getCRCLength()])));
@@ -778,22 +765,22 @@ void RF24::printPrettyDetails(void)
     uint8_t features = read_register(FEATURE);
     printf_P(PSTR("Multicast\t\t" PRIPSTR
                   "\r\n"),
-             (char*)(pgm_read_ptr(&rf24_feature_e_str_P[static_cast<bool>(features & _BV(EN_DYN_ACK)) * 2])));
+             (char*)(pgm_read_ptr(&rf24_feature_e_str_P[static_cast<uint8_t>(static_cast<bool>(features & _BV(EN_DYN_ACK)) * 2)])));
     printf_P(PSTR("Custom ACK Payload\t" PRIPSTR
                   "\r\n"),
-             (char*)(pgm_read_ptr(&rf24_feature_e_str_P[static_cast<bool>(features & _BV(EN_ACK_PAY)) * 1])));
+             (char*)(pgm_read_ptr(&rf24_feature_e_str_P[static_cast<uint8_t>(static_cast<bool>(features & _BV(EN_ACK_PAY)) * 1)])));
 
     uint8_t dynPl = read_register(DYNPD);
     printf_P(PSTR("Dynamic Payloads\t" PRIPSTR
                   "\r\n"),
-             (char*)(pgm_read_ptr(&rf24_feature_e_str_P[(dynPl && (features & _BV(EN_DPL))) * 1])));
+             (char*)(pgm_read_ptr(&rf24_feature_e_str_P[static_cast<uint8_t>((dynPl && (features & _BV(EN_DPL))) * 1)])));
 
     uint8_t autoAck = read_register(EN_AA);
     if (autoAck == 0x3F || autoAck == 0) {
         // all pipes have the same configuration about auto-ack feature
         printf_P(PSTR("Auto Acknowledgment\t" PRIPSTR
                       "\r\n"),
-                 (char*)(pgm_read_ptr(&rf24_feature_e_str_P[static_cast<bool>(autoAck) * 1])));
+                 (char*)(pgm_read_ptr(&rf24_feature_e_str_P[static_cast<uint8_t>(static_cast<bool>(autoAck) * 1)])));
     }
     else {
         // representation per pipe
@@ -859,21 +846,21 @@ uint16_t RF24::sprintfPrettyDetails(char* debugging_information)
         static_cast<uint16_t>(getChannel() + 2400),
         (char*)(pgm_read_ptr(&rf24_datarate_e_str_P[getDataRate()])),
         (char*)(pgm_read_ptr(&rf24_pa_dbm_e_str_P[getPALevel()])),
-        (char*)(pgm_read_ptr(&rf24_feature_e_str_P[(read_register(RF_SETUP) & 1) * 1])),
+        (char*)(pgm_read_ptr(&rf24_feature_e_str_P[static_cast<uint8_t>((read_register(RF_SETUP) & 1) * 1)])),
         (char*)(pgm_read_ptr(&rf24_crclength_e_str_P[getCRCLength()])),
         ((read_register(SETUP_AW) & 3) + 2), getPayloadSize(),
         ((read_register(SETUP_RETR) >> ARD) * 250 + 250),
         (read_register(SETUP_RETR) & 0x0F), (read_register(OBSERVE_TX) >> 4),
         (read_register(OBSERVE_TX) & 0x0F),
-        (char*)(pgm_read_ptr(&rf24_feature_e_str_P[static_cast<bool>(read_register(FEATURE) & _BV(EN_DYN_ACK)) * 2])),
-        (char*)(pgm_read_ptr(&rf24_feature_e_str_P[static_cast<bool>(read_register(FEATURE) & _BV(EN_ACK_PAY)) * 1])),
-        (char*)(pgm_read_ptr(&rf24_feature_e_str_P[(read_register(DYNPD) && (read_register(FEATURE) & _BV(EN_DPL))) * 1])));
+        (char*)(pgm_read_ptr(&rf24_feature_e_str_P[static_cast<uint8_t>(static_cast<bool>(read_register(FEATURE) & _BV(EN_DYN_ACK)) * 2)])),
+        (char*)(pgm_read_ptr(&rf24_feature_e_str_P[static_cast<uint8_t>(static_cast<bool>(read_register(FEATURE) & _BV(EN_ACK_PAY)) * 1)])),
+        (char*)(pgm_read_ptr(&rf24_feature_e_str_P[static_cast<uint8_t>((read_register(DYNPD) && (read_register(FEATURE) & _BV(EN_DPL))) * 1)])));
     uint8_t autoAck = read_register(EN_AA);
     if (autoAck == 0x3F || autoAck == 0) {
         // all pipes have the same configuration about auto-ack feature
         offset += sprintf_P(
             debugging_information + offset, PSTR("" PRIPSTR ""),
-            (char*)(pgm_read_ptr(&rf24_feature_e_str_P[static_cast<bool>(autoAck) * 1])));
+            (char*)(pgm_read_ptr(&rf24_feature_e_str_P[static_cast<uint8_t>(static_cast<bool>(autoAck) * 1)])));
     }
     else {
         // representation per pipe
@@ -1308,11 +1295,11 @@ bool RF24::writeBlocking(const void* buf, uint8_t len, uint32_t timeout)
 
 void RF24::reUseTX()
 {
+    ce(LOW);
     write_register(NRF_STATUS, _BV(MAX_RT)); //Clear max retry flag
     read_register(REUSE_TX_PL, (uint8_t*)nullptr, 0);
     IF_RF24_DEBUG(printf_P("[Reusing payload in TX FIFO]"););
-    ce(LOW); //Re-Transfer packet
-    ce(HIGH);
+    ce(HIGH); //Re-Transfer packet
 }
 
 /****************************************************************************/
@@ -1769,7 +1756,8 @@ bool RF24::writeAckPayload(uint8_t pipe, const void* buf, uint8_t len)
 
 bool RF24::isAckPayloadAvailable(void)
 {
-    return available(NULL);
+    uint8_t pipe = RF24_NO_FETCH_PIPE;
+    return available(&pipe);
 }
 
 /****************************************************************************/
@@ -1977,9 +1965,8 @@ void RF24::startConstCarrier(rf24_pa_dbm_e level, uint8_t channel)
     IF_RF24_DEBUG(printf_P(PSTR("RF_SETUP=%02x\r\n"), read_register(RF_SETUP)));
     ce(HIGH);
     if (isPVariant()) {
-        delay(1); // datasheet says 1 ms is ok in this instance
-        ce(LOW);
-        reUseTX();
+        delay(1);  // datasheet says 1 ms is ok in this instance
+        reUseTX(); // CE gets toggled here
     }
 }
 

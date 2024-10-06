@@ -12,8 +12,8 @@
  * Class declaration for RF24 and helper enums
  */
 
-#ifndef __RF24_H__
-#define __RF24_H__
+#ifndef RF24_H_
+#define RF24_H_
 
 #include "RF24_config.h"
 
@@ -1746,7 +1746,7 @@ public:
      *
      * On all devices but Linux and ATTiny, a small delay is added to the CSN toggling function
      *
-     * This is intended to minimise the speed of SPI polling due to radio commands
+     * This is intended to minimize the speed of SPI polling due to radio commands
      *
      * If using interrupts or timed requests, this can be set to 0 Default:5
      */
@@ -1789,7 +1789,7 @@ public:
      * @brief Open or close all data pipes.
      *
      * This function does not alter the addresses assigned to pipes. It is simply a
-     * convenience function that allows controling all pipes at once.
+     * convenience function that allows controlling all pipes at once.
      * @param isEnabled `true` opens all pipes; `false` closes all pipes.
      */
     void toggleAllPipes(bool isEnabled);
@@ -2410,4 +2410,4 @@ private:
  * Use `ctrl+c` to quit at any time.
  */
 
-#endif // __RF24_H__
+#endif // RF24_H_
